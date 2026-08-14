@@ -1,0 +1,14 @@
+# Python cache & bytecode
+__pycache__/
+*.py[cod]
+*$py.class
+
+# User configuration & local state (Contains personal repo paths)
+config.json
+
+# Logs
+*.log
+
+# OS generated files
+.DS_Store
+Thumbs.db

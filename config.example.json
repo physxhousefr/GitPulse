@@ -1,0 +1,13 @@
+{
+  "bot_active": false,
+  "dry_run": false,
+  "commit_style": "smart_conventional",
+  "commit_message_template": "docs(auto): sync repo activity log - {date} {time}",
+  "activity_file_name": "ACTIVITY.md",
+  "global_interval_minutes": 30,
+  "randomize_schedule": true,
+  "min_random_delay_mins": 5,
+  "max_random_delay_mins": 45,
+  "repos": [],
+  "history": []
+}

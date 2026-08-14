@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GitPulse — Bot Auto-Commit & Push</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <!-- Stylesheet -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <div class="glow-bg"></div>
+
+    <div class="app-container">
+        <!-- HEADER -->
+        <header class="app-header">
+            <div class="brand">
+                <div class="logo-icon">
+                    <i class="fa-solid fa-code-commit"></i>
+                </div>
+                <div class="brand-text">
+                    <h1>GitPulse <span class="badge-dev">v1.0.0</span></h1>
+                    <p>Bot d'Auto-Commit & Auto-Push pour Dépôts GitHub</p>
+                </div>
+            </div>
+
+            <div class="header-controls">
+                <div class="control-item">
+                    <label class="toggle-label" for="dryRunToggle">
+                        <span class="toggle-text"><i class="fa-solid fa-flask"></i> Mode Dry-Run</span>
+                        <input type="checkbox" id="dryRunToggle">
+                        <span class="slider round"></span>
+                    </label>
+                </div>
+
+                <button id="btnSettings" class="btn btn-secondary">
+                    <i class="fa-solid fa-gear"></i> Paramètres
+                </button>
+
+                <div class="bot-master-switch">
+                    <button id="btnToggleBot" class="btn btn-master inactive">
+                        <span class="led-indicator"></span>
+                        <span id="botStatusText">BOT DÉSACTIVÉ</span>
+                    </button>
+                </div>
+            </div>
+        </header>
+
+        <!-- METRICS ROW -->
+        <div class="metrics-grid">
+            <div class="metric-card">
+                <div class="metric-icon cyan"><i class="fa-solid fa-folder-tree"></i></div>
+                <div class="metric-info">
+                    <span class="metric-value" id="valActiveRepos">0</span>
+                    <span class="metric-label">Dépôts Suivis</span>
+                </div>
+            </div>
+            <div class="metric-card">
+                <div class="metric-icon purple"><i class="fa-solid fa-cloud-arrow-up"></i></div>
+                <div class="metric-info">
+                    <span class="metric-value" id="valTotalCommits">0</span>
+                    <span class="metric-label">Commits Effectués</span>
+                </div>
+            </div>
+            <div class="metric-card">
+                <div class="metric-icon emerald"><i class="fa-solid fa-code-commit"></i></div>
+                <div class="metric-info">
+                    <span class="metric-value" id="valDiffStats">+0 / -0</span>
+                    <span class="metric-label">Modifications Code (+ / -)</span>
+                </div>
+            </div>
+            <div class="metric-card">
+                <div class="metric-icon coral"><i class="fa-solid fa-shield-halved"></i></div>
+                <div class="metric-info">
+                    <span class="metric-value" id="valDryRunStatus">OFF</span>
+                    <span class="metric-label">Push Réel vers Origin</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- CONTRIBUTION HEATMAP PREVIEW -->
+        <div class="glass-panel heatmap-panel">
+            <div class="panel-header">
+                <h3><i class="fa-solid fa-calendar-days"></i> Grille d'Activité GitHub Réelle (365 Jours)</h3>
+                <span class="text-subtle" id="heatmapTooltip">Survolez un carré pour voir les détails</span>
+            </div>
+            <div class="heatmap-container" id="heatmapGrid">
+                <!-- Generated dynamically from real git log -->
+            </div>
+        </div>
+
+        <!-- MAIN DASHBOARD CONTENT -->
+        <div class="dashboard-grid">
+            <!-- LEFT COLUMN: REPOSITORIES -->
+            <div class="left-col">
+                <div class="glass-panel">
+                    <div class="panel-header">
+                        <h3><i class="fa-brands fa-git-alt"></i> Mes Dépôts Git (<span id="repoCountTag">0</span>)</h3>
+                        <button id="btnAddRepo" class="btn btn-primary btn-sm">
+                            <i class="fa-solid fa-plus"></i> Ajouter un Dépôt
+                        </button>
+                    </div>
+
+                    <div id="repoList" class="repo-list">
+                        <div class="empty-state" id="emptyReposState">
+                            <i class="fa-solid fa-folder-open"></i>
+                            <p>Aucun dépôt Git configuré.</p>
+                            <span class="text-subtle">Cliquez sur "Ajouter un Dépôt" pour démarrer l'automatisation.</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- RIGHT COLUMN: LIVE LOGS & HISTORY -->
+            <div class="right-col">
+                <!-- LIVE LOGS CONSOLE -->
+                <div class="glass-panel console-panel">
+                    <div class="panel-header">
+                        <h3><i class="fa-solid fa-terminal"></i> Console de Logs (Temps Réel)</h3>
+                        <div class="console-actions">
+                            <button id="btnClearLogs" class="btn btn-icon" title="Effacer la console">
+                                <i class="fa-solid fa-trash-can"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="console-body" id="consoleBody">
+                        <div class="log-line info">[-] gitpulse : Initialisation de l'interface GitPulse...</div>
+                    </div>
+                </div>
+
+                <!-- COMMIT HISTORY TIMELINE -->
+                <div class="glass-panel history-panel">
+                    <div class="panel-header">
+                        <h3><i class="fa-solid fa-list-check"></i> Historique Récent</h3>
+                    </div>
+                    <div class="history-list" id="historyList">
+                        <!-- History items inserted dynamically -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL: ADD REPOSITORY -->
+    <div class="modal-overlay" id="modalAddRepo">
+        <div class="modal-card">
+            <div class="modal-header">
+                <h3><i class="fa-solid fa-folder-plus"></i> Ajouter un Dépôt Git Local</h3>
+                <button class="btn-close" id="btnCloseAddRepoModal"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label>Chemin du Répertoire Git Local</label>
+                    <div class="input-with-button">
+                        <input type="text" id="inputRepoPath" placeholder="C:\Projets\MonRepoGit" />
+                        <button type="button" id="btnBrowseFolder" class="btn btn-secondary">
+                            <i class="fa-solid fa-folder-open"></i> Parcourir
+                        </button>
+                    </div>
+                    <small class="help-text">Sélectionnez n'importe quel dossier de projet Git.</small>
+                </div>
+
+                <div class="form-group">
+                    <label>Nom d'affichage (Optionnel)</label>
+                    <input type="text" id="inputRepoName" placeholder="Ex: Mon Super Projet" />
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group col-6">
+                        <label>Mode de Commit</label>
+                        <select id="selectRepoMode">
+                            <option value="hybrid" selected>Hybride (Fichiers si présent, sinon Log)</option>
+                            <option value="changes_only">Uniquement si Fichiers Modifiés</option>
+                            <option value="activity_only">Uniquement Log (ACTIVITY.md)</option>
+                        </select>
+                    </div>
+                    <div class="form-group col-6">
+                        <label>Intervalle (Minutes)</label>
+                        <input type="number" id="inputRepoInterval" value="30" min="1" max="1440" />
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" id="btnCancelAddRepo">Annuler</button>
+                <button class="btn btn-primary" id="btnConfirmAddRepo"><i class="fa-solid fa-check"></i> Ajouter au Bot</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL: GLOBAL SETTINGS -->
+    <div class="modal-overlay" id="modalSettings">
+        <div class="modal-card">
+            <div class="modal-header">
+                <h3><i class="fa-solid fa-sliders"></i> Paramètres Globaux du Bot</h3>
+                <button class="btn-close" id="btnCloseSettingsModal"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label>Générateur de Messages de Commit Intelligents (IA/Diff)</label>
+                    <select id="settingCommitStyle">
+                        <option value="smart_conventional" selected>🧠 Conventionnelle Intelligente (docs, feat, fix, style...)</option>
+                        <option value="smart_emoji">✨ Emoji Intelligente (📝 docs, ✨ feat, 🎨 style, 🔧 chore...)</option>
+                        <option value="custom">⚙️ Modèle Personnalisé (Template texte ci-dessous)</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label>Modèle de Message Personnalisé (Template)</label>
+                    <input type="text" id="settingCommitTemplate" value="docs(auto): sync activity log - {date} {time}" />
+                    <small class="help-text">Variables autorisées : <code>{date}</code>, <code>{time}</code>, <code>{repo}</code></small>
+                </div>
+
+                <div class="form-group">
+                    <label>Nom du Fichier d'Activité Généré</label>
+                    <input type="text" id="settingActivityFilename" value="ACTIVITY.md" />
+                </div>
+
+                <div class="form-group">
+                    <label class="checkbox-label">
+                        <input type="checkbox" id="settingRandomize" checked />
+                        <span>Ajouter un délai aléatoire naturel (Evite les heures fixes de bot)</span>
+                    </label>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group col-6">
+                        <label>Délai Aléatoire Min (Mins)</label>
+                        <input type="number" id="settingMinRandom" value="3" min="1" />
+                    </div>
+                    <div class="form-group col-6">
+                        <label>Délai Aléatoire Max (Mins)</label>
+                        <input type="number" id="settingMaxRandom" value="25" min="1" />
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" id="btnCancelSettings">Annuler</button>
+                <button class="btn btn-primary" id="btnSaveSettings"><i class="fa-solid fa-floppy-disk"></i> Enregistrer</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- App Scripts -->
+    <script src="{{ url_for('static', filename='js/app.js') }}"></script>
+</body>
+</html>

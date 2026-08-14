@@ -4,6 +4,7 @@
 
 **Gestionnaire d'Auto-Push Git intelligent avec Interface Web Dark Glassmorphic & Icône System Tray (Windows)**
 
+[![GitHub Repo](https://img.shields.io/badge/GitHub-physxhousefr%2FGitPulse-181717?style=for-the-badge&logo=github&logoColor=white)](https://github.com/physxhousefr/GitPulse)
 [![Python](https://img.shields.io/badge/Python-3.10%2B-3776AB?style=for-the-badge&logo=python&logoColor=white)](https://python.org)
 [![Flask](https://img.shields.io/badge/Backend-Flask_REST-000000?style=for-the-badge&logo=flask&logoColor=white)](https://flask.palletsprojects.com/)
 [![UI](https://img.shields.io/badge/UI-Dark_Glassmorphism-00f2fe?style=for-the-badge&logo=css3&logoColor=white)](#-interface-graphique)
@@ -52,14 +53,14 @@ Grâce à son interface Web réactive au style **Dark Glassmorphism**, sa consol
     - ✨ Code source (C++, C#, Python, JS...) ➔ `feat(core): update source logic (main.cpp)`
     - 🎨 UI & Styles ➔ `style(ui): adjust interface styling & layout`
     - 🔧 Fichiers de configuration ➔ `chore(config): update build settings`
-  - Styles de messages configurables : **Conventionnel Intelligente**, **Emoji Intelligente** (`✨ feat:...`), ou **Template Personnalisée**.
+  - Styles de messages configurables : **Conventionnelle Intelligente**, **Emoji Intelligente** (`✨ feat:...`), ou **Template Personnalisée**.
 
 - **📊 Heatmap d'Activité GitHub Réelle (365 Jours)** :
   - Grille de contribution interactive basée sur l'historique réel des commits de vos dépôts Git.
   - Info-bulle interactive indiquant la date exacte et le volume de commits (`X commits le YYYY-MM-DD`).
   - Statistiques en direct du nombre de lignes ajoutées (`+`) et supprimées (`-`).
 
-- **🤫 Execution Totalement Silencieuse (`CREATE_NO_WINDOW`)** :
+- **🤫 Exécution Totalement Silencieuse (`CREATE_NO_WINDOW`)** :
   - Exécution en arrière-plan sans aucune pop-up ni clignotement de fenêtre console grâce au drapeau système `subprocess.CREATE_NO_WINDOW`.
 
 - **⏰ Planification Aléatoire & Anti-Détection** :
@@ -109,8 +110,8 @@ git_auto_push_bot/
 
 ### 2. Cloner le Dépôt
 ```bash
-git clone https://github.com/votre-compte/git-pulse-bot.git
-cd git-pulse-bot
+git clone https://github.com/physxhousefr/GitPulse.git
+cd GitPulse
 ```
 
 ### 3. Installer les Dépendances
@@ -174,5 +175,5 @@ Ce projet est distribué sous la licence **MIT**. Consulter le fichier [`LICENSE
 ---
 
 <div align="center">
-  <sub>Développé avec ❤️ pour la communauté Open Source</sub>
+  <sub>Développé avec ❤️ pour la communauté Open Source • <a href="https://github.com/physxhousefr/GitPulse">physxhousefr/GitPulse</a></sub>
 </div>

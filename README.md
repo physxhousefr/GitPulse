@@ -2,24 +2,25 @@
 
 # ⚡ GitPulse — Bot Auto-Commit & Auto-Push
 
-**Gestionnaire d'Auto-Push Git intelligent avec Interface Web Dark Glassmorphic & Icône System Tray (Windows)**
+<p align="center">
+  <b>Automation d'Auto-Push Git avec Dashboard Web Dark Glassmorphic, IA de Commits & Tray Manager Windows</b>
+</p>
 
 [![GitHub Repo](https://img.shields.io/badge/GitHub-physxhousefr%2FGitPulse-181717?style=for-the-badge&logo=github&logoColor=white)](https://github.com/physxhousefr/GitPulse)
 [![Python](https://img.shields.io/badge/Python-3.10%2B-3776AB?style=for-the-badge&logo=python&logoColor=white)](https://python.org)
 [![Flask](https://img.shields.io/badge/Backend-Flask_REST-000000?style=for-the-badge&logo=flask&logoColor=white)](https://flask.palletsprojects.com/)
 [![UI](https://img.shields.io/badge/UI-Dark_Glassmorphism-00f2fe?style=for-the-badge&logo=css3&logoColor=white)](#-interface-graphique)
-[![Platform](https://img.shields.io/badge/Platform-Windows_10_%2F_11-blue?style=for-the-badge&logo=windows11&logoColor=white)](https://microsoft.com)
-[![License](https://img.shields.io/badge/License-MIT-green?style=for-the-badge)](./LICENSE)
+[![Platform](https://img.shields.io/badge/Platform-Windows_10_%2F_11-0078D4?style=for-the-badge&logo=windows11&logoColor=white)](https://microsoft.com)
+[![License](https://img.shields.io/badge/License-MIT-10b981?style=for-the-badge)](./LICENSE)
 
-<p align="center">
-  <a href="#-vue-densemble">Vue d'Ensemble</a> •
-  <a href="#-fonctionnalités-phares">Fonctionnalités</a> •
-  <a href="#-structure-du-projet">Architecture</a> •
-  <a href="#-installation--démarrage">Installation</a> •
-  <a href="#-modes-dauto-commit">Modes de Commit</a> •
-  <a href="#-faq--dépannage">FAQ & Dépannage</a> •
-  <a href="#-licence">Licence</a>
-</p>
+<br/>
+
+[📌 Vue d'ensemble](#-vue-densemble) •
+[✨ Fonctionnalités](#-fonctionnalités-phares) •
+[🚀 Installation](#-installation--démarrage) •
+[⚙️ Modes](#-modes-dauto-commit) •
+[🛠️ Architecture](#%EF%B8%8F-structure-du-projet) •
+[❓ FAQ](#-faq--dépannage)
 
 ---
 
@@ -27,153 +28,157 @@
 
 ## 🌟 Vue d'Ensemble
 
-**GitPulse** est une application autonome moderne conçue pour automatiser la synchronisation (commit & push) de vos dépôts Git locaux vers vos dépôts distants (GitHub, GitLab, Gitea). 
+> [!NOTE]
+> **GitPulse** est une suite logicielle autonome pour Windows qui automatise l'envoi intelligent de vos commits et pushes Git (GitHub, GitLab, Gitea) sans perturber vos sessions de code.
 
-Grâce à son interface Web réactive au style **Dark Glassmorphism**, sa console de logs en temps réel via SSE, son intégration native dans la barre des tâches Windows (**System Tray**) et son moteur d'auto-commit intelligent basé sur l'analyse de diff, GitPulse maintient votre profil et vos dépôts à jour sans jamais perturber votre travail.
+Doté d'un **Dashboard Web réactif au style Cyberpunk / Dark Glassmorphism**, d'une console de logs temps réel via **SSE**, d'un gestionnaire dans la **barre des tâches Windows (System Tray)** et d'un moteur de génération de messages de commit intelligents par analyse de diff, GitPulse garde vos dépôts actifs et votre profil GitHub synchronisé en tâche de fond.
 
 ---
 
 ## ✨ Fonctionnalités Phares
 
-- **🎨 Interface Web Cyberpunk / Glassmorphism** :
-  - Dashboard moderne avec verre dépoli (`backdrop-filter`), thèmes sombres néon, et indicateurs LED d'état d'exécution.
-  - Stream de logs en temps réel via **Server-Sent Events (SSE)** avec préfixe d'état `[-] gitpulse : message`.
+### 🎨 Dashboard Web Dark Glassmorphism
+- **Interface Next-Gen** : Thème sombre néon avec verre dépoli (`backdrop-filter`), jauges d'activité et boutons d'action instantanés.
+- **Console Temps Réel (SSE)** : Stream de logs en direct depuis le bot avec formattage structuré `[-] gitpulse : message`.
+- **Grille de Contribution 365 jours** : Heatmap d'activité générée directement à partir de vos dépôts Git réels avec survol interactif.
 
-- **📌 Intégration Native System Tray (Zone de notification Windows)** :
-  - Se loge silencieusement à côté de l'heure (^).
-  - Menu contextuel interactif :
-    - 🌐 *Ouvrir le Dashboard Web* (`http://127.0.0.1:5050`)
-    - 🟢 / 🔴 *Activer / Mettre en Pause le Bot*
-    - ⚡ *Forcer Commit & Push Tout*
-    - ❌ *Quitter GitPulse*
+### 📌 Intégration System Tray Windows
+- **Discrétion totale** : L'application se loge dans la zone de notification Windows (à côté de l'heure `^`).
+- **Menu d'action rapide** :
+  - 🌐 *Ouvrir le Dashboard Web* (`http://127.0.0.1:5050`)
+  - 🟢 / 🔴 *Basculer le Bot (Actif / Pause)*
+  - ⚡ *Forcer Commit & Push Tout*
+  - ❌ *Quitter GitPulse*
 
-- **🧠 Moteur d'Auto-Commit Intelligent (Analyse de Diff)** :
-  - Détecte le type de fichiers modifiés pour générer des messages de commit propres et professionnels :
-    - 📝 Modifications de documentation ➔ `docs(readme): update README.md documentation`
-    - ✨ Code source (C++, C#, Python, JS...) ➔ `feat(core): update source logic (main.cpp)`
-    - 🎨 UI & Styles ➔ `style(ui): adjust interface styling & layout`
-    - 🔧 Fichiers de configuration ➔ `chore(config): update build settings`
-  - Styles de messages configurables : **Conventionnelle Intelligente**, **Emoji Intelligente** (`✨ feat:...`), ou **Template Personnalisée**.
+### 🧠 Moteur d'Auto-Commit Intelligent
+- **Analyse de Diff Automatique** : Détection des extensions et du contenu des fichiers pour catégoriser les commits :
+  - 📝 Docs ➔ `docs(readme): update documentation`
+  - ✨ Code ➔ `feat(core): update source logic`
+  - 🎨 Styles ➔ `style(ui): adjust layout design`
+  - 🔧 Config ➔ `chore(config): update build settings`
+- **Styles modulables** : Formats *Conventionnel Intelligente*, *Emoji Intelligente* (`✨ feat:...`), ou *Modèle Texte Personnalisé*.
 
-- **📊 Heatmap d'Activité GitHub Réelle (365 Jours)** :
-  - Grille de contribution interactive basée sur l'historique réel des commits de vos dépôts Git.
-  - Info-bulle interactive indiquant la date exacte et le volume de commits (`X commits le YYYY-MM-DD`).
-  - Statistiques en direct du nombre de lignes ajoutées (`+`) et supprimées (`-`).
-
-- **🤫 Exécution Totalement Silencieuse (`CREATE_NO_WINDOW`)** :
-  - Exécution en arrière-plan sans aucune pop-up ni clignotement de fenêtre console grâce au drapeau système `subprocess.CREATE_NO_WINDOW`.
-
-- **⏰ Planification Aléatoire & Anti-Détection** :
-  - Système de jitter aléatoire configurable (ex: 5 à 25 min d'écart) pour simuler une activité de développement naturelle.
-
-- **🔄 Intégration au Démarrage de Windows** :
-  - Configuration automatique en 1 clic pour lancer le bot discrètement dès l'allumage du PC.
-
----
-
-## 🛠️ Structure du Projet
-
-```text
-git_auto_push_bot/
-├── main.py                  # Point d'entrée principal (Serveur Web Flask & System Tray)
-├── setup_autostart.py       # Générateur de raccourci au démarrage de Windows (.lnk)
-├── requirements.txt         # Liste des dépendances Python (Flask, Flask-Cors, pystray, Pillow)
-├── config.example.json      # Template de configuration exemple
-├── GitPulse.lnk             # Raccourci Windows de lancement silencieux sans console
-├── LICENSE                  # Licence Open-Source MIT
-├── README.md                # Documentation officielle du projet
-│
-├── core/                    # Package Back-end Python
-│   ├── __init__.py
-│   ├── config_manager.py    # Gestion de la persistance JSON
-│   ├── git_manager.py       # Wrapper Git, détection de branche & générateur de diff
-│   ├── scheduler.py         # Moteur de boucle d'arrière-plan & diffusion SSE
-│   └── tray_manager.py      # Gestionnaire d'icône système Windows Tray
-│
-├── static/                  # Ressources statiques Frontend
-│   ├── css/style.css        # Thème CSS Glassmorphism
-│   ├── js/app.js            # Logique Web Client JS, SSE Logs, Heatmap
-│   └── images/
-│       └── tray_icon.png    # Icône de la barre des tâches
-│
-└── templates/               # Vues HTML
-    └── index.html           # Interface Web Dashboard
-```
+### 🤫 Exécution Silencieuse & Aléatoire
+- **0 Clignotement Console** : Exécution arrière-plan avec le flag système `CREATE_NO_WINDOW`.
+- **Anti-Détection Jitter** : Intervalle de commit aléatoire paramétrable (ex: 5 à 45 min) pour simuler une activité de développement naturelle.
 
 ---
 
 ## 🚀 Installation & Démarrage
 
 ### 1. Prérequis
-- **Python 3.10 ou supérieur** (Testé avec succès sous Python 3.13 x64)
-- **Git CLI** installé et configuré sur votre système Windows avec vos accès GitHub (SSH ou HTTPS Credential Manager).
+- **Windows 10 / 11**
+- **Python 3.10+** (Recommandé : Python 3.12 ou 3.13)
+- **Git CLI** installé et configuré (`git config --global user.name` et `user.email`)
 
-### 2. Cloner le Dépôt
+### 2. Installation Rapide
+
 ```bash
+# 1. Cloner le dépôt
 git clone https://github.com/physxhousefr/GitPulse.git
 cd GitPulse
-```
 
-### 3. Installer les Dépendances
-```bash
+# 2. Installer les dépendances Python
 pip install -r requirements.txt
 ```
 
-### 4. Démarrage de l'Application
+### 3. Modes de Lancement
 
-- **Option A (Recommandée - Silencieux dans la barre des tâches)** :
-  Double-cliquez sur `GitPulse.lnk` ou lancez le raccourci **GitPulse** créé sur votre Bureau.
+| Méthode | Commande | Description |
+| :--- | :--- | :--- |
+| **GUI Setup Manager** *(Recommandé)* | `python setup.py` | Interface Tkinter complète pour gérer l'Autostart, les dépendances et le service |
+| **Démarrage Silencieux** | `python main.py --autostart` | Lancement direct en arrière-plan avec icône System Tray |
+| **Démarrage Interactif** | `python main.py` | Démarre le bot et ouvre le Dashboard Web (`http://127.0.0.1:5050`) |
 
-- **Option B (Démarrage Automatique avec Windows)** :
-  Exécutez une fois le script de configuration :
-  ```bash
-  python setup_autostart.py
-  ```
-
-- **Option C (Mode Console / Développeur)** :
-  ```bash
-  python main.py
-  ```
-
-L'interface Web s'ouvrira automatiquement sur : **`http://127.0.0.1:5050`**
+> [!TIP]
+> Lancez `python setup.py` pour créer en un clic le **raccourci sur votre Bureau** et activer le **démarrage automatique au lancement de Windows**.
 
 ---
 
-## ⚙️ Modes d'Auto-Commit Disponibles
+## ⚙️ Modes d'Auto-Commit
 
-| Mode | Fonctionnement |
+```mermaid
+flowchart LR
+    A[Timer Bot] --> B{Fichiers modifiés ?}
+    B -- Oui --> C[Commit & Push des Fichiers]
+    B -- Non --> D{Mode configuré ?}
+    D -- Hybride --> E[Sync ACTIVITY.md & Push]
+    D -- Fichiers uniquement --> F[Attente du prochain cycle]
+    D -- Journal d'activité --> E
+```
+
+| Mode | Comportement |
 | :--- | :--- |
-| **Hybride** *(Recommandé)* | Commite et pousse vos modifications de code s'il y en a. Si le dépôt est propre, génère une entrée horodatée dans `ACTIVITY.md` pour maintenir l'activité. |
-| **Fichiers Modifiés** | Ne déclenche un commit & push **que si des modifications réelles de fichiers** sont détectées dans votre espace de travail. |
-| **Journal d'Activité** | Met à jour uniquement le journal `ACTIVITY.md` sans toucher à vos fichiers de code source. |
+| **Hybride** *(Recommandé)* | Pousse vos modifications de code réelles. Si le dépôt est propre, met à jour `ACTIVITY.md` pour conserver la régularité. |
+| **Fichiers Modifiés** | Ne déclenche un commit & push **que si des changements réels** sont détectés dans le workspace. |
+| **Journal d'Activité** | Génère uniquement une entrée d'activité dans `ACTIVITY.md` sans modifier vos fichiers de code. |
+
+---
+
+## 🛠️ Structure du Projet
+
+```text
+GitPulse/
+├── main.py                  # Point d'entrée principal (Flask Web Server & System Tray)
+├── setup.py                 # Interface GUI de gestion (Setup, Autostart & Service Control)
+├── setup_autostart.py       # Configuration autonome du Registre Autostart Windows
+├── requirements.txt         # Dépendances Python (Flask, pystray, Pillow, customtkinter)
+├── config.example.json      # Modèle de configuration par défaut
+├── LICENSE                  # Licence Open-Source MIT
+├── README.md                # Documentation officielle
+│
+├── core/                    # Moteur Python Back-end
+│   ├── config_manager.py    # Persistance de configuration JSON & Repos
+│   ├── git_manager.py       # Wrapper Git CLI, détection de branche & analyse diff
+│   ├── scheduler.py         # Planificateur de tâches & serveur d'événements SSE
+│   └── tray_manager.py      # Gestionnaire d'icône Windows System Tray
+│
+├── static/                  # Assets Frontend
+│   ├── css/style.css        # Stylesheet Dark Glassmorphism
+│   ├── js/app.js            # Dashboard Client JS (SSE Logs, Heatmap, Modals)
+│   └── images/
+│       ├── tray_icon.png    # Icône HD de la barre des tâches
+│       └── tray_icon.ico    # Icône binaire multi-résolution Windows
+│
+└── templates/               # Templates HTML5
+    └── index.html           # Vues HTML du Dashboard Web
+```
 
 ---
 
 ## ❓ FAQ & Dépannage
 
 <details>
-<summary><b>Comment arrêter le bot s'il tourne en arrière-plan ?</b></summary>
-Faites un clic droit sur l'icône GitPulse située dans la zone de notification Windows (à côté de l'heure ^) et cliquez sur <b>Quitter GitPulse</b>.
+<summary><b>💬 Comment arrêter proprement le bot en arrière-plan ?</b></summary>
+<br/>
+Faites un clic droit sur l'icône GitPulse située dans la zone de notification Windows (à côté de l'heure <code>^</code>) et sélectionnez <b>Quitter GitPulse</b>. Vous pouvez également ouvrir <code>python setup.py</code> et cliquer sur <b>⏹ Arrêter GitPulse</b>.
 </details>
 
 <details>
-<summary><b>Mes identifiants Git/GitHub sont-ils sécurisés ?</b></summary>
-Oui. GitPulse n'enregistre ni ne manipule vos mots de passe ou tokens. Il utilise directement l'exécutable local <code>git</code> de votre système, tirant parti de vos clés SSH existantes ou du <i>Windows Git Credential Manager</i>.
+<summary><b>🔒 Mes identifiants Git et tokens sont-ils stockés par le bot ?</b></summary>
+<br/>
+Non. GitPulse ne stocke aucun identifiant, jeton ou mot de passe. Il s'appuie directement sur votre exécutable <code>git</code> local et vos clés SSH ou le <i>Windows Git Credential Manager</i> déjà configurés sur votre ordinateur.
 </details>
 
 <details>
-<summary><b>Est-ce que le bot affiche des fenêtres noires intempestives pendant que je travaille ?</b></summary>
-Non. Toutes les opérations système sont exécutées avec le drapeau <code>CREATE_NO_WINDOW</code>, garantissant 0 clignotement de console à l'écran.
+<summary><b>🛡️ Mes données et chemins personnels sont-ils publiés sur GitHub ?</b></summary>
+<br/>
+Non. Le fichier de configuration <code>config.json</code> (contenant vos dossiers de projets) ainsi que les fichiers de logs (<code>*.log</code>) sont strictly ignorés via <code>.gitignore</code>.
+</details>
+
+<details>
+<summary><b>🖥️ Le bot fait-il clignoter des fenêtres consoles pendant que je travaille ?</b></summary>
+<br/>
+Non. Toutes les opérations système sont exécutées avec le drapeau <code>CREATE_NO_WINDOW</code>, garantissant une discrétion totale sans fenêtres intempestives.
 </details>
 
 ---
 
 ## 📄 Licence
 
-Ce projet est distribué sous la licence **MIT**. Consulter le fichier [`LICENSE`](./LICENSE) pour plus de détails.
-
----
+Ce projet est sous licence **MIT**. Voir le fichier [`LICENSE`](./LICENSE) pour plus d'informations.
 
 <div align="center">
-  <sub>Développé avec ❤️ pour la communauté Open Source • <a href="https://github.com/physxhousefr/GitPulse">physxhousefr/GitPulse</a></sub>
+  <br/>
+  <sub>Projet développé avec passion pour la communauté Open Source • <a href="https://github.com/physxhousefr/GitPulse">GitPulse sur GitHub</a></sub>
 </div>

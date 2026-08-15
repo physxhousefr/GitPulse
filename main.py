@@ -137,11 +137,42 @@ def run_flask_server():
     print(f"[-] gitpulse : Lancement du serveur Web Bot Git sur http://127.0.0.1:{PORT}")
     app.run(host="127.0.0.1", port=PORT, debug=False, use_reloader=False)
 
+def acquire_single_instance_mutex(mutex_name="Global\\GitPulse_SingleInstance_Mutex"):
+    """Crée un mutex nommé Windows pour garantir une seule instance active de GitPulse."""
+    if sys.platform != "win32":
+        return True
+    try:
+        import ctypes
+        from ctypes import wintypes
+        kernel32 = ctypes.windll.kernel32
+        mutex = kernel32.CreateMutexW(None, wintypes.BOOL(False), mutex_name)
+        last_error = kernel32.GetLastError()
+        ERROR_ALREADY_EXISTS = 183
+        if last_error == ERROR_ALREADY_EXISTS:
+            return None
+        return mutex
+    except Exception:
+        return True
+
 if __name__ == "__main__":
-    flask_thread = threading.Thread(target=run_flask_server, daemon=True)
-    flask_thread.start()
+    is_autostart = "--autostart" in sys.argv
+    _instance_mutex = acquire_single_instance_mutex()
+    if not _instance_mutex:
+        if not is_autostart:
+            webbrowser.open("http://127.0.0.1:5050")
+        sys.exit(0)
 
-    threading.Timer(1.25, lambda: webbrowser.open("http://127.0.0.1:5050")).start()
+    try:
+        flask_thread = threading.Thread(target=run_flask_server, daemon=True)
+        flask_thread.start()
 
-    tray = SystemTrayManager(config_mgr, bot_scheduler)
-    tray.run()
+        if not is_autostart:
+            threading.Timer(1.25, lambda: webbrowser.open("http://127.0.0.1:5050")).start()
+
+        tray = SystemTrayManager(config_mgr, bot_scheduler)
+        tray.run(delay_seconds=3 if is_autostart else 0)
+    except Exception as e:
+        import traceback
+        log_file = os.path.join(os.path.dirname(os.path.abspath(__file__)), "gitpulse_autostart.log")
+        with open(log_file, "a", encoding="utf-8") as f:
+            f.write(f"[{sys.argv}] Exception: {str(e)}\n{traceback.format_exc()}\n")

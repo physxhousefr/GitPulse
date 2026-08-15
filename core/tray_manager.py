@@ -1,5 +1,6 @@
 import os
 import sys
+import time
 import webbrowser
 import threading
 import pystray
@@ -24,11 +25,15 @@ class SystemTrayManager:
         
         img = Image.new('RGBA', (64, 64), color=(0, 0, 0, 0))
         draw = ImageDraw.Draw(img)
-        draw.ellipse((4, 4, 60, 60), fill=(15, 23, 42, 240), outline=(0, 242, 254, 255), width=3)
-        draw.line((24, 16, 24, 48), fill=(0, 242, 254, 255), width=4)
-        draw.ellipse((20, 12, 28, 20), fill=(16, 185, 129, 255))
-        draw.ellipse((20, 44, 28, 52), fill=(16, 185, 129, 255))
-        draw.ellipse((38, 28, 46, 36), fill=(0, 242, 254, 255))
+        # Background rounded box with cyan border
+        draw.rounded_rectangle((2, 2, 62, 62), radius=14, fill=(15, 23, 42, 255), outline=(0, 242, 254, 230), width=3)
+        # Git Diamond shape
+        draw.polygon([(32, 14), (50, 32), (32, 50), (14, 32)], fill=(255, 255, 255, 255))
+        # Git branch inner lines (dark)
+        draw.line((32, 20, 32, 42), fill=(15, 23, 42, 255), width=3)
+        draw.line((32, 28, 40, 22), fill=(15, 23, 42, 255), width=3)
+        draw.ellipse((29, 39, 35, 45), fill=(15, 23, 42, 255))
+        draw.ellipse((37, 19, 43, 25), fill=(15, 23, 42, 255))
         return img
 
     def on_open_dashboard(self, icon=None, item=None):
@@ -63,7 +68,10 @@ class SystemTrayManager:
             self.on_exit_callback()
         os._exit(0)
 
-    def run(self):
+    def run(self, delay_seconds=0):
+        if delay_seconds > 0:
+            time.sleep(delay_seconds)
+
         menu = pystray.Menu(
             item('Ouvrir le Dashboard GitPulse', self.on_open_dashboard, default=True),
             item('Activer / Pause le Bot', self.on_toggle_bot, checked=self.is_bot_active),
@@ -71,5 +79,11 @@ class SystemTrayManager:
             pystray.Menu.SEPARATOR,
             item('Quitter GitPulse', self.on_exit)
         )
-        self.icon = pystray.Icon("GitPulseBot", self._create_image(), "GitPulse Auto-Push Bot", menu)
-        self.icon.run()
+
+        for attempt in range(5):
+            try:
+                self.icon = pystray.Icon("GitPulseBot", self._create_image(), "GitPulse Auto-Push Bot", menu)
+                self.icon.run()
+                break
+            except Exception as e:
+                time.sleep(3)

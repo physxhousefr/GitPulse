@@ -2,3 +2,4 @@ flask
 flask-cors
 pystray
 pillow
+customtkinter

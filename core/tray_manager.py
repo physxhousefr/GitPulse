@@ -6,6 +6,7 @@ import threading
 import pystray
 from pystray import MenuItem as item
 from PIL import Image, ImageDraw
+from .logger import log_streamer
 
 class SystemTrayManager:
     def __init__(self, config_mgr, bot_scheduler, on_exit_callback=None):
@@ -20,8 +21,8 @@ class SystemTrayManager:
         if os.path.exists(icon_path):
             try:
                 return Image.open(icon_path)
-            except Exception:
-                pass
+            except Exception as e:
+                log_streamer.log(f"Erreur chargement icône tray : {e}", level="error")
         
         img = Image.new('RGBA', (64, 64), color=(0, 0, 0, 0))
         draw = ImageDraw.Draw(img)

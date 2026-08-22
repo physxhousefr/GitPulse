@@ -2,7 +2,10 @@ import os
 import sys
 import subprocess
 import datetime
+import time
+import time
 from typing import Tuple, Dict, Any, List
+from .ai_generator import generate_commit_message_with_ai
 
 class GitManager:
     @classmethod
@@ -106,8 +109,19 @@ class GitManager:
             "lines_deleted": lines_deleted
         }
 
+    _heatmap_cache = {}
+    _heatmap_cache_expiry = 300  # 5 minutes
+
     @classmethod
     def get_commit_heatmap_data(cls, repo_paths: List[str]) -> Dict[str, int]:
+        cache_key = tuple(sorted(repo_paths))
+        now = time.time()
+        
+        if cache_key in cls._heatmap_cache:
+            cache_time, data = cls._heatmap_cache[cache_key]
+            if now - cache_time < cls._heatmap_cache_expiry:
+                return data
+
         heatmap_map = {}
         for r_path in repo_paths:
             norm_path = cls.normalize_repo_path(r_path)
@@ -120,10 +134,19 @@ class GitManager:
                     date_str = date_str.strip()
                     if date_str:
                         heatmap_map[date_str] = heatmap_map.get(date_str, 0) + 1
+        cls._heatmap_cache[cache_key] = (now, heatmap_map)
         return heatmap_map
 
     @classmethod
-    def generate_smart_commit_message(cls, repo_path: str, style: str = "smart_conventional", fallback_template: str = "") -> str:
+    def generate_smart_commit_message(
+        cls, 
+        repo_path: str, 
+        style: str = "smart_conventional", 
+        fallback_template: str = "",
+        ai_provider: str = "none",
+        ai_api_key: str = "",
+        ai_model: str = "gpt-4o-mini"
+    ) -> str:
         norm_path = cls.normalize_repo_path(repo_path)
         ok, out = cls.run_git_command(norm_path, ["status", "--porcelain"])
         
@@ -150,6 +173,17 @@ class GitManager:
         has_config = any(f.endswith((".json", ".yml", ".yaml", ".bat", ".sh", ".toml")) or "config" in f.lower() for f in modified_files)
 
         primary_file = modified_files[0] if len(modified_files) == 1 else None
+
+        if style == "smart_ai" and ai_provider != "none" and ai_api_key:
+            ok_diff, diff_out = cls.run_git_command(norm_path, ["diff", "--cached"])
+            if not ok_diff or not diff_out.strip():
+                ok_diff, diff_out = cls.run_git_command(norm_path, ["diff"])
+            if ok_diff and diff_out.strip():
+                ai_msg = generate_commit_message_with_ai(diff_out, ai_provider, ai_api_key, ai_model)
+                if ai_msg:
+                    return ai_msg
+            # Fallback to smart_conventional if AI fails
+            style = "smart_conventional"
 
         if style == "smart_emoji":
             if has_readme:
@@ -251,7 +285,10 @@ class GitManager:
         commit_template: str = "docs(auto): sync activity log - {date} {time}",
         commit_style: str = "smart_conventional",
         activity_filename: str = "ACTIVITY.md",
-        dry_run: bool = False
+        dry_run: bool = False,
+        ai_provider: str = "none",
+        ai_api_key: str = "",
+        ai_model: str = "gpt-4o-mini"
     ) -> Tuple[bool, str, str]:
         norm_path = cls.normalize_repo_path(repo_path)
         if not cls.is_git_repo(norm_path):
@@ -300,7 +337,10 @@ class GitManager:
         commit_msg = cls.generate_smart_commit_message(
             repo_path=norm_path,
             style=commit_style,
-            fallback_template=commit_template
+            fallback_template=commit_template,
+            ai_provider=ai_provider,
+            ai_api_key=ai_api_key,
+            ai_model=ai_model
         )
 
         if dry_run:

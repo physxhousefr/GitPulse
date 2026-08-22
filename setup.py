@@ -8,6 +8,7 @@ import subprocess
 import webbrowser
 from datetime import datetime
 
+from core.logger import LOG_NAME
 try:
     import customtkinter as ctk
 except ImportError:
@@ -81,7 +82,7 @@ class GitPulseSetupApp(ctk.CTk):
         self.configure(fg_color=self.c_bg)
 
         self._build_ui()
-        self.log("[-] gitpulse : Interface de gestion GitPulse initialisée.")
+        self.log("Interface de gestion GitPulse initialisée.")
         
         # Démarrer la boucle de rafraîchissement du statut
         self.refresh_status()
@@ -306,7 +307,7 @@ class GitPulseSetupApp(ctk.CTk):
 
     def log(self, message, level="info"):
         now_str = datetime.now().strftime("%H:%M:%S")
-        prefix = "[-] gitpulse" if level == "info" else "[!] gitpulse"
+        prefix = f"[-] {LOG_NAME}" if level == "info" else f"[!] {LOG_NAME}"
         line = f"{prefix} : [{now_str}] {message}\n"
         
         self.txt_logs.insert("end", line)
@@ -314,7 +315,7 @@ class GitPulseSetupApp(ctk.CTk):
 
     def on_clear_logs(self):
         self.txt_logs.delete("1.0", "end")
-        self.log("[-] gitpulse : Console nettoyée.")
+        self.log("Console nettoyée.")
 
     def is_port_open(self, host="127.0.0.1", port=5050):
         with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
@@ -367,7 +368,7 @@ class GitPulseSetupApp(ctk.CTk):
 
     def on_enable_autostart(self):
         def task():
-            self.log("[-] gitpulse : Configuration du Démarrage Automatique Windows...")
+            self.log("Configuration du Démarrage Automatique Windows...")
             pythonw_path = find_best_pythonw()
 
             # 1. Nettoyer tout ancien raccourci Startup pour éviter tout double démarrage
@@ -382,33 +383,33 @@ class GitPulseSetupApp(ctk.CTk):
             reg_cmd = f'Set-ItemProperty -Path "HKCU:\\Software\\Microsoft\\Windows\\CurrentVersion\\Run" -Name "GitPulse" -Value \'{reg_value}\''
             subprocess.run(["powershell", "-Command", reg_cmd], capture_output=True)
 
-            self.log(f"[-] gitpulse : Démarrage automatique unique activé dans le Registre Windows avec {pythonw_path}")
+            self.log(f"Démarrage automatique unique activé dans le Registre Windows avec {pythonw_path}")
             self.after(0, self.refresh_status)
 
         threading.Thread(target=task, daemon=True).start()
 
     def on_disable_autostart(self):
         def task():
-            self.log("[-] gitpulse : Désactivation de l'Autostart Windows...")
+            self.log("Désactivation de l'Autostart Windows...")
             # Supprimer raccourci éventuel
             if os.path.exists(SHORTCUT_STARTUP):
                 try:
                     os.remove(SHORTCUT_STARTUP)
                 except Exception as e:
-                    self.log(f"[!] gitpulse : Erreur lors de la suppression du raccourci : {e}", level="error")
+                    self.log(f"Erreur lors de la suppression du raccourci : {e}", level="error")
 
             # Supprimer clé registre
             reg_cmd = 'Remove-ItemProperty -Path "HKCU:\\Software\\Microsoft\\Windows\\CurrentVersion\\Run" -Name "GitPulse" -ErrorAction SilentlyContinue'
             subprocess.run(["powershell", "-Command", reg_cmd], capture_output=True)
 
-            self.log("[-] gitpulse : Autostart désactivé avec succès.")
+            self.log("Autostart désactivé avec succès.")
             self.after(0, self.refresh_status)
 
         threading.Thread(target=task, daemon=True).start()
 
     def on_create_desktop_shortcut(self):
         def task():
-            self.log("[-] gitpulse : Création du raccourci sur le Bureau...")
+            self.log("Création du raccourci sur le Bureau...")
             pythonw_path = find_best_pythonw()
             ps_cmd = (
                 f'$Wsh = New-Object -ComObject WScript.Shell; '
@@ -420,14 +421,14 @@ class GitPulseSetupApp(ctk.CTk):
                 f'$S.Save()'
             )
             subprocess.run(["powershell", "-Command", ps_cmd], capture_output=True)
-            self.log(f"[-] gitpulse : Raccourci Bureau créé : '{SHORTCUT_DESKTOP}'")
+            self.log(f"Raccourci Bureau créé : '{SHORTCUT_DESKTOP}'")
 
         threading.Thread(target=task, daemon=True).start()
 
     def on_start_bot(self, autostart=True):
         def task():
             if self.is_port_open(port=5050):
-                self.log("[-] gitpulse : Le service GitPulse tourne déjà sur le port 5050.")
+                self.log("Le service GitPulse tourne déjà sur le port 5050.")
                 if not autostart:
                     self.on_open_browser()
                 return
@@ -436,9 +437,9 @@ class GitPulseSetupApp(ctk.CTk):
             args = [pythonw_path, MAIN_PY]
             if autostart:
                 args.append("--autostart")
-                self.log(f"[-] gitpulse : Lancement silencieux en arrière-plan avec {pythonw_path}...")
+                self.log(f"Lancement silencieux en arrière-plan avec {pythonw_path}...")
             else:
-                self.log(f"[-] gitpulse : Lancement de GitPulse avec ouverture du Dashboard...")
+                self.log("Lancement de GitPulse avec ouverture du Dashboard...")
 
             creation_flags = subprocess.CREATE_NO_WINDOW if sys.platform == "win32" else 0
             subprocess.Popen(args, cwd=BASE_DIR, creationflags=creation_flags)
@@ -449,24 +450,24 @@ class GitPulseSetupApp(ctk.CTk):
 
     def on_stop_bot(self):
         def task():
-            self.log("[-] gitpulse : Arrêt de tous les processus GitPulse...")
+            self.log("Arrêt de tous les processus GitPulse...")
             # Tue les processus python/pythonw qui exécutent main.py
             ps_kill = 'Get-WmiObject Win32_Process | Where-Object { $_.CommandLine -like "*main.py*" } | ForEach-Object { Stop-Process -Id $_.ProcessId -Force }'
             subprocess.run(["powershell", "-Command", ps_kill], capture_output=True)
             time.sleep(1.0)
-            self.log("[-] gitpulse : Processus GitPulse arrêtés.")
+            self.log("Processus GitPulse arrêtés.")
             self.after(0, self.refresh_status)
 
         threading.Thread(target=task, daemon=True).start()
 
     def on_open_browser(self):
         webbrowser.open("http://127.0.0.1:5050")
-        self.log("[-] gitpulse : Ouverture du Dashboard dans le navigateur : http://127.0.0.1:5050")
+        self.log("Ouverture du Dashboard dans le navigateur : http://127.0.0.1:5050")
 
     def on_install_deps_async(self):
         def task():
             self.btn_install_deps.configure(state="disabled", text="⏳ Installation en cours...")
-            self.log("[-] gitpulse : Lancement de 'pip install -r requirements.txt'...")
+            self.log("Lancement de 'pip install -r requirements.txt'...")
             
             py_exec = sys.executable
             cmd = [py_exec, "-m", "pip", "install", "-r", REQUIREMENTS_FILE]
@@ -484,13 +485,13 @@ class GitPulseSetupApp(ctk.CTk):
             for line in process.stdout:
                 line_str = line.strip()
                 if line_str:
-                    self.log(f"[-] gitpulse : {line_str}")
+                    self.log(line_str)
 
             process.wait()
             if process.returncode == 0:
-                self.log("[-] gitpulse : Toutes les dépendances ont été installées et vérifiées avec succès !")
+                self.log("Toutes les dépendances ont été installées et vérifiées avec succès !")
             else:
-                self.log(f"[!] gitpulse : Échec de l'installation (Code {process.returncode})", level="error")
+                self.log(f"Échec de l'installation (Code {process.returncode})", level="error")
 
             self.btn_install_deps.configure(state="normal", text="⚡ Installer / Réparer Dépendances (pip)")
             self.after(0, self.refresh_status)

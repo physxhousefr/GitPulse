@@ -205,6 +205,7 @@
                     <select id="settingCommitStyle">
                         <option value="smart_conventional" selected>🧠 Conventionnelle Intelligente (docs, feat, fix, style...)</option>
                         <option value="smart_emoji">✨ Emoji Intelligente (📝 docs, ✨ feat, 🎨 style, 🔧 chore...)</option>
+                        <option value="smart_ai">🤖 Génération par IA (OpenAI / Gemini)</option>
                         <option value="custom">⚙️ Modèle Personnalisé (Template texte ci-dessous)</option>
                     </select>
                 </div>
@@ -213,6 +214,26 @@
                     <label>Modèle de Message Personnalisé (Template)</label>
                     <input type="text" id="settingCommitTemplate" value="docs(auto): sync activity log - {date} {time}" />
                     <small class="help-text">Variables autorisées : <code>{date}</code>, <code>{time}</code>, <code>{repo}</code></small>
+                </div>
+
+                <div id="aiSettingsGroup" style="display: none; background: rgba(0,242,254,0.05); padding: 12px; border-radius: 8px; border: 1px solid rgba(0,242,254,0.2); margin-bottom: 15px;">
+                    <div class="form-group">
+                        <label>Fournisseur d'IA</label>
+                        <select id="settingAiProvider">
+                            <option value="none">Sélectionner...</option>
+                            <option value="openai">OpenAI (ChatGPT)</option>
+                            <option value="gemini">Google Gemini</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Clé API</label>
+                        <input type="password" id="settingAiApiKey" placeholder="sk-..." />
+                        <small class="help-text">La clé est stockée localement dans config.json.</small>
+                    </div>
+                    <div class="form-group mb-0">
+                        <label>Modèle (Laissez vide pour le défaut)</label>
+                        <input type="text" id="settingAiModel" placeholder="gpt-4o-mini ou gemini-2.5-flash" />
+                    </div>
                 </div>
 
                 <div class="form-group">

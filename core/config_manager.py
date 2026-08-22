@@ -3,6 +3,7 @@ import json
 import uuid
 import datetime
 from typing import Dict, List, Any
+from .logger import log_streamer
 
 # Root directory of project
 ROOT_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -18,6 +19,9 @@ DEFAULT_CONFIG = {
     "randomize_schedule": True,
     "min_random_delay_mins": 5,
     "max_random_delay_mins": 45,
+    "ai_provider": "none",
+    "ai_api_key": "",
+    "ai_model": "gpt-4o-mini",
     "repos": [],
     "history": []
 }
@@ -38,7 +42,8 @@ class ConfigManager:
                     if k not in data:
                         data[k] = v
                 return data
-        except Exception:
+        except Exception as e:
+            log_streamer.log(f"Erreur de chargement config.json : {e}", level="error")
             return DEFAULT_CONFIG.copy()
 
     def _save(self, data: Dict[str, Any] = None):
@@ -52,7 +57,8 @@ class ConfigManager:
 
     def update_settings(self, settings: Dict[str, Any]) -> Dict[str, Any]:
         for key in ["bot_active", "dry_run", "commit_style", "commit_message_template", "activity_file_name", 
-                    "global_interval_minutes", "randomize_schedule", "min_random_delay_mins", "max_random_delay_mins"]:
+                    "global_interval_minutes", "randomize_schedule", "min_random_delay_mins", "max_random_delay_mins",
+                    "ai_provider", "ai_api_key", "ai_model"]:
             if key in settings:
                 self.config[key] = settings[key]
         self._save()

@@ -315,6 +315,13 @@ body {
     align-items: center;
     gap: 16px;
     backdrop-filter: blur(12px);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.metric-card:hover {
+    transform: translateY(-4px);
+    border-color: rgba(255, 255, 255, 0.2);
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5), var(--shadow-glow);
 }
 
 .metric-icon {
@@ -346,7 +353,9 @@ body {
 /* HEATMAP GRID */
 .heatmap-container {
     display: grid;
-    grid-template-columns: repeat(52, 1fr);
+    grid-template-columns: repeat(53, 12px);
+    grid-template-rows: repeat(7, 12px);
+    grid-auto-flow: column;
     gap: 4px;
     padding: 10px 0;
     overflow-x: auto;
@@ -406,7 +415,9 @@ body {
 
 .repo-card:hover {
     background: var(--bg-card-hover);
-    border-color: rgba(255, 255, 255, 0.15);
+    border-color: rgba(0, 242, 254, 0.4);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 15px rgba(0, 242, 254, 0.15);
 }
 
 .repo-header {

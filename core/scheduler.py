@@ -7,35 +7,7 @@ from typing import Generator
 from .config_manager import ConfigManager
 from .git_manager import GitManager
 
-class LogStreamer:
-    """Gestionnaire de flux de logs SSE (Server-Sent Events)."""
-    def __init__(self):
-        self.listeners = []
-
-    def subscribe(self) -> Queue:
-        q = Queue()
-        self.listeners.append(q)
-        return q
-
-    def unsubscribe(self, q: Queue):
-        if q in self.listeners:
-            self.listeners.remove(q)
-
-    def log(self, message: str, level: str = "info"):
-        now_str = datetime.datetime.now().strftime("%H:%M:%S")
-        prefix = "[-] gitpulse" if level == "info" else "[!] gitpulse"
-        formatted_log = f"{prefix} : [{now_str}] {message}"
-
-        dead_queues = []
-        for q in self.listeners:
-            try:
-                q.put_nowait(formatted_log)
-            except Exception:
-                dead_queues.append(q)
-        for dq in dead_queues:
-            self.unsubscribe(dq)
-
-log_streamer = LogStreamer()
+from .logger import log_streamer
 
 class BotScheduler:
     def __init__(self, config_mgr: ConfigManager):
@@ -77,6 +49,9 @@ class BotScheduler:
         commit_style = cfg.get("commit_style", "smart_conventional")
         commit_template = cfg.get("commit_message_template", "docs(auto): sync activity log - {date} {time}")
         activity_filename = cfg.get("activity_file_name", "ACTIVITY.md")
+        ai_provider = cfg.get("ai_provider", "none")
+        ai_api_key = cfg.get("ai_api_key", "")
+        ai_model = cfg.get("ai_model", "gpt-4o-mini")
 
         log_streamer.log(f"Analyse du dépôt '{repo_name}' ({mode}, style={commit_style}, dry_run={dry_run})...", level="info")
 
@@ -86,7 +61,10 @@ class BotScheduler:
             commit_template=commit_template,
             commit_style=commit_style,
             activity_filename=activity_filename,
-            dry_run=dry_run
+            dry_run=dry_run,
+            ai_provider=ai_provider,
+            ai_api_key=ai_api_key,
+            ai_model=ai_model
         )
 
         if success:

@@ -46,6 +46,10 @@ document.addEventListener('DOMContentLoaded', () => {
     const settingRandomize = document.getElementById('settingRandomize');
     const settingMinRandom = document.getElementById('settingMinRandom');
     const settingMaxRandom = document.getElementById('settingMaxRandom');
+    const aiSettingsGroup = document.getElementById('aiSettingsGroup');
+    const settingAiProvider = document.getElementById('settingAiProvider');
+    const settingAiApiKey = document.getElementById('settingAiApiKey');
+    const settingAiModel = document.getElementById('settingAiModel');
 
     // --- INITIALIZATION ---
     fetchConfig();
@@ -359,7 +363,18 @@ document.addEventListener('DOMContentLoaded', () => {
             settingRandomize.checked = !!currentConfig.randomize_schedule;
             settingMinRandom.value = currentConfig.min_random_delay_mins || 3;
             settingMaxRandom.value = currentConfig.max_random_delay_mins || 25;
+            settingAiProvider.value = currentConfig.ai_provider || 'none';
+            settingAiApiKey.value = currentConfig.ai_api_key || '';
+            settingAiModel.value = currentConfig.ai_model || '';
         }
+        
+        const toggleAiSettings = () => {
+            aiSettingsGroup.style.display = settingCommitStyle.value === 'smart_ai' ? 'block' : 'none';
+        };
+        settingCommitStyle.removeEventListener('change', toggleAiSettings);
+        settingCommitStyle.addEventListener('change', toggleAiSettings);
+        toggleAiSettings();
+
         modalSettings.classList.add('active');
     });
 
@@ -374,7 +389,10 @@ document.addEventListener('DOMContentLoaded', () => {
             activity_file_name: settingActivityFilename.value.trim(),
             randomize_schedule: settingRandomize.checked,
             min_random_delay_mins: parseInt(settingMinRandom.value) || 1,
-            max_random_delay_mins: parseInt(settingMaxRandom.value) || 10
+            max_random_delay_mins: parseInt(settingMaxRandom.value) || 10,
+            ai_provider: settingAiProvider.value,
+            ai_api_key: settingAiApiKey.value.trim(),
+            ai_model: settingAiModel.value.trim()
         };
 
         await fetch('/api/settings', {

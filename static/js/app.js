@@ -50,6 +50,10 @@ document.addEventListener('DOMContentLoaded', () => {
     const settingAiProvider = document.getElementById('settingAiProvider');
     const settingAiApiKey = document.getElementById('settingAiApiKey');
     const settingAiModel = document.getElementById('settingAiModel');
+    const settingWindowsNotifications = document.getElementById('settingWindowsNotifications');
+    const settingDiscordNotifications = document.getElementById('settingDiscordNotifications');
+    const settingDiscordWebhook = document.getElementById('settingDiscordWebhook');
+    const discordWebhookGroup = document.getElementById('discordWebhookGroup');
 
     // --- INITIALIZATION ---
     fetchConfig();
@@ -173,9 +177,14 @@ document.addEventListener('DOMContentLoaded', () => {
                             ${isDirty ? `Fichiers Modifiés (+${diffStats.lines_added} / -${diffStats.lines_deleted})` : 'Propre'}
                         </span>
                     </div>
-                    <div class="repo-header-actions">
                         <button class="btn btn-secondary btn-sm btn-trigger-now" data-id="${repo.id}" title="Commiter et Pusher maintenant">
                             <i class="fa-solid fa-paper-plane"></i> Push
+                        </button>
+                        <button class="btn btn-icon btn-history-repo" data-id="${repo.id}" title="Historique & Rollback">
+                            <i class="fa-solid fa-clock-rotate-left"></i>
+                        </button>
+                        <button class="btn btn-icon btn-gitignore-repo" data-id="${repo.id}" title="Gérer .gitignore">
+                            <i class="fa-solid fa-file-shield"></i>
                         </button>
                         <button class="btn btn-icon btn-delete-repo" data-id="${repo.id}" title="Supprimer">
                             <i class="fa-solid fa-trash-can"></i>
@@ -192,11 +201,121 @@ document.addEventListener('DOMContentLoaded', () => {
             `;
 
             card.querySelector('.btn-trigger-now').addEventListener('click', () => triggerRepoPush(repo.id));
+            card.querySelector('.btn-history-repo').addEventListener('click', () => openHistoryModal(repo));
+            card.querySelector('.btn-gitignore-repo').addEventListener('click', () => openGitignoreModal(repo));
             card.querySelector('.btn-delete-repo').addEventListener('click', () => deleteRepo(repo.id));
 
             repoList.appendChild(card);
         });
     }
+
+    // --- NEW MODALS LOGIC ---
+    const modalHistory = document.getElementById('modalHistory');
+    const historyRepoName = document.getElementById('historyRepoName');
+    const historyTableContainer = document.getElementById('historyTableContainer');
+    const btnRollback = document.getElementById('btnRollback');
+    const btnCloseHistoryModal = document.getElementById('btnCloseHistoryModal');
+    let currentHistoryRepoId = null;
+
+    async function openHistoryModal(repo) {
+        currentHistoryRepoId = repo.id;
+        historyRepoName.textContent = repo.name;
+        historyTableContainer.innerHTML = 'Chargement de l\'historique...';
+        btnRollback.style.display = 'none';
+        modalHistory.classList.add('active');
+
+        try {
+            const res = await fetch(`/api/repos/${repo.id}/history`);
+            const data = await res.json();
+            if (data.success && data.history.length > 0) {
+                btnRollback.style.display = 'block';
+                let html = '<table style="width:100%; border-collapse: collapse; text-align: left;">';
+                html += '<tr><th style="padding:5px; border-bottom:1px solid rgba(255,255,255,0.1)">Hash</th><th style="padding:5px; border-bottom:1px solid rgba(255,255,255,0.1)">Message</th><th style="padding:5px; border-bottom:1px solid rgba(255,255,255,0.1)">Date</th></tr>';
+                data.history.forEach(item => {
+                    html += `<tr>
+                        <td style="padding:5px; border-bottom:1px solid rgba(255,255,255,0.05); font-family:monospace; color:var(--accent-cyan);">${escapeHtml(item.hash)}</td>
+                        <td style="padding:5px; border-bottom:1px solid rgba(255,255,255,0.05);">${escapeHtml(item.message)}</td>
+                        <td style="padding:5px; border-bottom:1px solid rgba(255,255,255,0.05); font-size: 11px;">${escapeHtml(item.date)}</td>
+                    </tr>`;
+                });
+                html += '</table>';
+                historyTableContainer.innerHTML = html;
+            } else {
+                historyTableContainer.innerHTML = 'Aucun commit trouvé.';
+            }
+        } catch (e) {
+            historyTableContainer.innerHTML = 'Erreur lors du chargement.';
+        }
+    }
+
+    btnCloseHistoryModal.addEventListener('click', () => modalHistory.classList.remove('active'));
+
+    btnRollback.addEventListener('click', async () => {
+        if (!confirm("Voulez-vous vraiment annuler le dernier commit ? Vos fichiers locaux modifiés seront conservés.")) return;
+        try {
+            const res = await fetch(`/api/repos/${currentHistoryRepoId}/rollback`, { method: 'POST' });
+            const data = await res.json();
+            if (data.success) {
+                alert("Commit annulé avec succès.");
+                modalHistory.classList.remove('active');
+                fetchConfig();
+            } else {
+                alert("Erreur: " + data.message);
+            }
+        } catch (e) {
+            alert("Erreur réseau lors de l'annulation.");
+        }
+    });
+
+    const modalGitignore = document.getElementById('modalGitignore');
+    const gitignoreRepoName = document.getElementById('gitignoreRepoName');
+    const inputGitignore = document.getElementById('inputGitignore');
+    const btnCloseGitignoreModal = document.getElementById('btnCloseGitignoreModal');
+    const btnCancelGitignore = document.getElementById('btnCancelGitignore');
+    const btnSaveGitignore = document.getElementById('btnSaveGitignore');
+    let currentGitignoreRepoId = null;
+
+    async function openGitignoreModal(repo) {
+        currentGitignoreRepoId = repo.id;
+        gitignoreRepoName.textContent = repo.name;
+        inputGitignore.value = 'Chargement...';
+        modalGitignore.classList.add('active');
+
+        try {
+            const res = await fetch(`/api/repos/${repo.id}/gitignore`);
+            const data = await res.json();
+            if (data.success) {
+                inputGitignore.value = data.content;
+            } else {
+                inputGitignore.value = '';
+            }
+        } catch (e) {
+            inputGitignore.value = 'Erreur lors du chargement.';
+        }
+    }
+
+    const closeGitignore = () => modalGitignore.classList.remove('active');
+    btnCloseGitignoreModal.addEventListener('click', closeGitignore);
+    btnCancelGitignore.addEventListener('click', closeGitignore);
+
+    btnSaveGitignore.addEventListener('click', async () => {
+        try {
+            const res = await fetch(`/api/repos/${currentGitignoreRepoId}/gitignore`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ content: inputGitignore.value })
+            });
+            const data = await res.json();
+            if (data.success) {
+                closeGitignore();
+                fetchConfig();
+            } else {
+                alert("Erreur: " + data.message);
+            }
+        } catch (e) {
+            alert("Erreur réseau.");
+        }
+    });
 
     function renderHistory(history) {
         historyList.innerHTML = '';
@@ -366,6 +485,9 @@ document.addEventListener('DOMContentLoaded', () => {
             settingAiProvider.value = currentConfig.ai_provider || 'none';
             settingAiApiKey.value = currentConfig.ai_api_key || '';
             settingAiModel.value = currentConfig.ai_model || '';
+            settingWindowsNotifications.checked = currentConfig.windows_notifications !== false;
+            settingDiscordNotifications.checked = !!currentConfig.discord_notifications;
+            settingDiscordWebhook.value = currentConfig.discord_webhook_url || '';
         }
         
         const toggleAiSettings = () => {
@@ -374,6 +496,13 @@ document.addEventListener('DOMContentLoaded', () => {
         settingCommitStyle.removeEventListener('change', toggleAiSettings);
         settingCommitStyle.addEventListener('change', toggleAiSettings);
         toggleAiSettings();
+
+        const toggleDiscordSettings = () => {
+            discordWebhookGroup.style.display = settingDiscordNotifications.checked ? 'block' : 'none';
+        };
+        settingDiscordNotifications.removeEventListener('change', toggleDiscordSettings);
+        settingDiscordNotifications.addEventListener('change', toggleDiscordSettings);
+        toggleDiscordSettings();
 
         modalSettings.classList.add('active');
     });
@@ -392,7 +521,10 @@ document.addEventListener('DOMContentLoaded', () => {
             max_random_delay_mins: parseInt(settingMaxRandom.value) || 10,
             ai_provider: settingAiProvider.value,
             ai_api_key: settingAiApiKey.value.trim(),
-            ai_model: settingAiModel.value.trim()
+            ai_model: settingAiModel.value.trim(),
+            windows_notifications: settingWindowsNotifications.checked,
+            discord_notifications: settingDiscordNotifications.checked,
+            discord_webhook_url: settingDiscordWebhook.value.trim()
         };
 
         await fetch('/api/settings', {

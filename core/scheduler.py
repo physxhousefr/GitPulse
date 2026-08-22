@@ -79,6 +79,16 @@ class BotScheduler:
             status=status,
             details=details
         )
+        
+        from .notifier import Notifier
+        if status in ["Success", "Error"]:
+            if cfg.get("discord_notifications", False):
+                webhook = cfg.get("discord_webhook_url", "")
+                if webhook:
+                    Notifier.send_discord_notification(webhook, repo_name, details, status)
+            if cfg.get("windows_notifications", True):
+                Notifier.send_windows_notification(f"GitPulse: {status}", f"{repo_name} - {details}")
+
         self._last_run_map[repo["id"]] = time.time()
         return {"success": success, "status": status, "details": details}
 

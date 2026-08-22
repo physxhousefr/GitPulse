@@ -258,6 +258,63 @@ class GitManager:
         }
 
     @classmethod
+    def get_git_history(cls, repo_path: str, limit: int = 10) -> List[Dict[str, str]]:
+        norm_path = cls.normalize_repo_path(repo_path)
+        if not cls.is_git_repo(norm_path):
+            return []
+            
+        ok, out = cls.run_git_command(norm_path, ["log", f"-{limit}", "--format=%h|%an|%ar|%s"])
+        history = []
+        if ok and out.strip():
+            for line in out.strip().split("\n"):
+                parts = line.split("|", 3)
+                if len(parts) == 4:
+                    history.append({
+                        "hash": parts[0],
+                        "author": parts[1],
+                        "date": parts[2],
+                        "message": parts[3]
+                    })
+        return history
+        
+    @classmethod
+    def rollback_last_commit(cls, repo_path: str) -> Tuple[bool, str]:
+        norm_path = cls.normalize_repo_path(repo_path)
+        if not cls.is_git_repo(norm_path):
+            return False, "Ce n'est pas un dépôt Git."
+            
+        ok, out = cls.run_git_command(norm_path, ["reset", "--soft", "HEAD~1"])
+        if ok:
+            return True, "Dernier commit annulé avec succès (fichiers préservés)."
+        return False, f"Erreur lors de l'annulation du commit : {out}"
+
+    @classmethod
+    def get_gitignore(cls, repo_path: str) -> str:
+        norm_path = cls.normalize_repo_path(repo_path)
+        ignore_path = os.path.join(norm_path, ".gitignore")
+        if os.path.exists(ignore_path):
+            try:
+                with open(ignore_path, "r", encoding="utf-8") as f:
+                    return f.read()
+            except:
+                pass
+        return ""
+
+    @classmethod
+    def save_gitignore(cls, repo_path: str, content: str) -> Tuple[bool, str]:
+        norm_path = cls.normalize_repo_path(repo_path)
+        if not cls.is_git_repo(norm_path):
+            return False, "Ce n'est pas un dépôt Git."
+            
+        ignore_path = os.path.join(norm_path, ".gitignore")
+        try:
+            with open(ignore_path, "w", encoding="utf-8") as f:
+                f.write(content)
+            return True, "Fichier .gitignore sauvegardé avec succès."
+        except Exception as e:
+            return False, f"Erreur de sauvegarde : {e}"
+
+    @classmethod
     def append_activity_log(cls, repo_path: str, filename: str = "ACTIVITY.md") -> str:
         norm_path = cls.normalize_repo_path(repo_path)
         file_path = os.path.join(norm_path, filename)

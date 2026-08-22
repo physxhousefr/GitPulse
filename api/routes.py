@@ -113,6 +113,52 @@ def init_routes(config_mgr, bot_scheduler):
         res = bot_scheduler.trigger_single_repo(repo_id)
         return jsonify(res)
 
+    @api_bp.route("/api/repos/<repo_id>/history", methods=["GET"])
+    def repo_history(repo_id):
+        cfg = config_mgr.get_all()
+        repo = next((r for r in cfg["repos"] if r["id"] == repo_id), None)
+        if not repo:
+            return jsonify({"success": False, "error": "Dépôt non trouvé."}), 404
+        
+        history = GitManager.get_git_history(repo["path"])
+        return jsonify({"success": True, "history": history})
+
+    @api_bp.route("/api/repos/<repo_id>/rollback", methods=["POST"])
+    def rollback_repo(repo_id):
+        cfg = config_mgr.get_all()
+        repo = next((r for r in cfg["repos"] if r["id"] == repo_id), None)
+        if not repo:
+            return jsonify({"success": False, "error": "Dépôt non trouvé."}), 404
+        
+        success, message = GitManager.rollback_last_commit(repo["path"])
+        if success:
+            log_streamer.log(f"Rollback réussi sur '{repo['name']}' : {message}", level="info")
+        else:
+            log_streamer.log(f"Échec Rollback sur '{repo['name']}' : {message}", level="error")
+        return jsonify({"success": success, "message": message})
+
+    @api_bp.route("/api/repos/<repo_id>/gitignore", methods=["GET"])
+    def get_gitignore(repo_id):
+        cfg = config_mgr.get_all()
+        repo = next((r for r in cfg["repos"] if r["id"] == repo_id), None)
+        if not repo:
+            return jsonify({"success": False, "error": "Dépôt non trouvé."}), 404
+            
+        content = GitManager.get_gitignore(repo["path"])
+        return jsonify({"success": True, "content": content})
+
+    @api_bp.route("/api/repos/<repo_id>/gitignore", methods=["POST"])
+    def save_gitignore(repo_id):
+        cfg = config_mgr.get_all()
+        repo = next((r for r in cfg["repos"] if r["id"] == repo_id), None)
+        if not repo:
+            return jsonify({"success": False, "error": "Dépôt non trouvé."}), 404
+            
+        data = request.json or {}
+        content = data.get("content", "")
+        success, message = GitManager.save_gitignore(repo["path"], content)
+        return jsonify({"success": success, "message": message})
+
     @api_bp.route("/api/logs/stream")
     def stream_logs():
         def event_stream():

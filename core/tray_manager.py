@@ -9,7 +9,10 @@ from PIL import Image, ImageDraw
 from .logger import log_streamer
 
 class SystemTrayManager:
+    instance = None
+    
     def __init__(self, config_mgr, bot_scheduler, on_exit_callback=None):
+        SystemTrayManager.instance = self
         self.config_mgr = config_mgr
         self.bot_scheduler = bot_scheduler
         self.on_exit_callback = on_exit_callback

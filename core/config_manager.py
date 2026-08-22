@@ -22,6 +22,9 @@ DEFAULT_CONFIG = {
     "ai_provider": "none",
     "ai_api_key": "",
     "ai_model": "gpt-4o-mini",
+    "discord_webhook_url": "",
+    "discord_notifications": False,
+    "windows_notifications": True,
     "repos": [],
     "history": []
 }

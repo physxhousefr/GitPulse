@@ -45,7 +45,7 @@ def _call_openai(prompt: str, api_key: str, model: str) -> str:
         return res_data["choices"][0]["message"]["content"].strip()
 
 def _call_gemini(prompt: str, api_key: str, model: str) -> str:
-    model_name = model or "gemini-2.5-flash"
+    model_name = model or "gemini-3.6-flash"
     url = f"https://generativelanguage.googleapis.com/v1beta/models/{model_name}:generateContent?key={api_key}"
     headers = {
         "Content-Type": "application/json"
@@ -54,10 +54,16 @@ def _call_gemini(prompt: str, api_key: str, model: str) -> str:
         "contents": [{"parts": [{"text": prompt}]}],
         "generationConfig": {
             "temperature": 0.2,
-            "maxOutputTokens": 60
+            "maxOutputTokens": 500
         }
     }
     req = urllib.request.Request(url, data=json.dumps(data).encode("utf-8"), headers=headers, method="POST")
     with urllib.request.urlopen(req, timeout=10) as response:
         res_data = json.loads(response.read().decode("utf-8"))
-        return res_data["candidates"][0]["content"]["parts"][0]["text"].strip()
+        candidate = res_data.get("candidates", [{}])[0]
+        content = candidate.get("content", {})
+        if "parts" in content and len(content["parts"]) > 0:
+            return content["parts"][0].get("text", "").strip()
+        else:
+            finish_reason = candidate.get("finishReason", "UNKNOWN")
+            raise Exception(f"Contenu bloqué ou vide (Raison: {finish_reason})")

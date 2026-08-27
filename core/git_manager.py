@@ -384,12 +384,7 @@ class GitManager:
                     return False, "Error", f"Échec de 'git add -A': {err_add}"
                 staged_anything = True
             elif not is_ahead:
-                act_file = cls.append_activity_log(norm_path, activity_filename)
-                rel_act_file = os.path.relpath(act_file, norm_path)
-                ok_add, err_add = cls.run_git_command(norm_path, ["add", rel_act_file])
-                if not ok_add:
-                    return False, "Error", f"Échec de 'git add {rel_act_file}': {err_add}"
-                staged_anything = True
+                return True, "Skipped", "Aucun changement local et aucun commit en attente de push."
 
         commit_msg = cls.generate_smart_commit_message(
             repo_path=norm_path,
